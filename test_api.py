@@ -3,7 +3,6 @@ import requests
 import unittest
 
 
-
 class GovernmentApiTest(unittest.TestCase):
     """Test wcg api class for find defect."""
 
@@ -14,6 +13,10 @@ class GovernmentApiTest(unittest.TestCase):
     def create_url_citizen(self,citizen_id, name, surname, birth_date, occupation, address):
         """Create url for citizen."""
         return f"citizen_id={citizen_id}&name={name}&surname={surname}&birth_date={birth_date}&occupation={occupation}&address={address}"
+
+    def create_url_vaccine(self,citizen_id, site_name, vaccine_name):
+        """Create url for vaccine reserve."""
+        return f"citizen_id={citizen_id}&site_name={site_name}&vaccine_name={vaccine_name}"
 
     def test_get_all_citizen_registration(self):
         """Test get all citizen information. It should return status 200."""
@@ -83,6 +86,63 @@ class GovernmentApiTest(unittest.TestCase):
         """Test get reservation. It should return status 200."""
         response = requests.get(self.URL+f"/reservation")
         self.assertEqual(200, response.status_code)
+
+    def test_reserve_vaccine(self):
+        """Test reserve vaccine."""
+        citizen = self.create_url_citizen("1234567890147","ABC","DEF","01/12/1999","Student","Home")
+        requests.post(self.URL+f"/registration?{citizen}")
+        vaccine_url = self.create_url_vaccine("1234567890147","Hospital", "Pfizer")
+        response = requests.post(self.URL+f"/reservation?{vaccine_url}")
+        res_json = response.json()
+        requests.delete(self.URL+f"/citizen")
+        self.assertEqual("reservation success!", res_json["feedback"])
+
+    def test_reserve_vaccine_but_not_register(self):
+        """Test reserve vaccine but not register."""
+        vaccine_url = self.create_url_vaccine("1234567890147","Hospital", "Pfizer")
+        response = requests.post(self.URL+f"/reservation?{vaccine_url}")
+        res_json = response.json()
+        self.assertEqual("reservation failed: citizen ID is not registered", res_json["feedback"])
+
+    def test_reserve_vaccine_not_valid(self):
+        """Test reserve vaccine that not Pfizer, Astra, Sinofarm and Sinovac."""
+        citizen = self.create_url_citizen("1234567890147","ABC","DEF","01/12/1999","Student","Home")
+        requests.post(self.URL+f"/registration?{citizen}")
+        vaccine_url = self.create_url_vaccine("1234567890147","Hospital", "Vaccine*><Mกข๗")
+        response = requests.post(self.URL+f"/reservation?{vaccine_url}")
+        res_json = response.json()
+        requests.delete(self.URL+f"/citizen")
+        self.assertEqual("report failed: invalid vaccine name", res_json["feedback"])
+
+    def test_reserve_duplicate_vaccine(self):
+        """Test reserve duplicate vaccine."""
+        citizen = self.create_url_citizen("1234567890147","ABC","DEF","01/12/1999","Student","Home")
+        requests.post(self.URL+f"/registration?{citizen}")
+        vaccine_url1 = self.create_url_vaccine("1234567890147","Hospital", "Pfizer")
+        requests.post(self.URL+f"/reservation?{vaccine_url1}")
+        vaccine_url2 = self.create_url_vaccine("1234567890147","Hospital", "Sinofarm")
+        response = requests.post(self.URL+f"/reservation?{vaccine_url2}")
+        res_json = response.json()
+        requests.delete(self.URL+f"/citizen")
+        self.assertEqual("reservation failed: there is already a reservation for this citizen", res_json["feedback"])
+
+    def test_cancel_reserve(self):
+        """Test cancel reserve."""
+        citizen = self.create_url_citizen("1234567890147","ABC","DEF","01/12/1999","Student","Home")
+        requests.post(self.URL+f"/registration?{citizen}")
+        vaccine_url = self.create_url_vaccine("1234567890147","Hospital", "Pfizer")
+        requests.post(self.URL+f"/reservation?{vaccine_url}")
+        response =requests.delete(self.URL+f"/reservation?citizen_id=1234567890147")
+        res_json = response.json()
+
+        requests.delete(self.URL+f"/citizen")
+        self.assertEqual("cancel reservation successfully", res_json["feedback"])
+
+    def test_missing_id_cancel_reserve(self):
+        """Test missing citizen id when cancel reserve."""
+        response =requests.delete(self.URL+f"/reservation?citizen_id=")
+        res_json = response.json()
+        self.assertEqual("cancel reservation failed: no citizen id is given", res_json["feedback"])
 
 
 if __name__ == '__main__':
