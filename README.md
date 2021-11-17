@@ -4,11 +4,16 @@ Test API service for World Class Government APIs.
 URL: https://wcg-apis.herokuapp.com
 - /registration
 - /registration?{citizen}
-- /citizen
-- /citizen/{citizen_id}
+- /registration/{citizen_id}
 - /reservation
 - /reservation?{vaccine_url}
-- /reservation?citizen_id={citizen_id}
+- /reservation/{citizen_id}
+- /database/citizen
+- /database/reservation
+## Install Python module
+```
+pip install -r requirements.txt
+```
 ## Running Test
 ```
 python -m unittest test_api.py
