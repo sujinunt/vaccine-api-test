@@ -34,7 +34,7 @@ class GovernmentApiTest(unittest.TestCase):
         self.post_registration()
         response = requests.get(self.URL+f"/registration/1234567890147")
         res_json = response.json()
-        requests.delete(self.URL+f"/registration")
+        requests.delete(self.URL+f"/registration/1234567890147")
         self.assertEqual("ABCD", res_json['name'])
 
     def test_get_invalid_registration_citizen(self):
@@ -47,7 +47,7 @@ class GovernmentApiTest(unittest.TestCase):
         self.post_registration()
         response = self.post_registration()
         res_json = response.json()
-        requests.delete(self.URL+f"/registration")
+        requests.delete(self.URL+f"/registration/1234567890147")
         self.assertEqual("registration failed: this person already registered", res_json["feedback"])
 
     def test_delete_registration_with_citizen_id(self):
@@ -96,7 +96,7 @@ class GovernmentApiTest(unittest.TestCase):
         response = requests.post(self.URL+f"/reservation?{vaccine_url}")
         res_json = response.json()
 
-        requests.delete(self.URL+f"/registration")
+        requests.delete(self.URL+f"/registration/1234567890147")
         self.assertEqual("reservation success!", res_json["feedback"])
 
     def test_reserve_vaccine_but_not_register(self):
@@ -112,7 +112,7 @@ class GovernmentApiTest(unittest.TestCase):
         vaccine_url = self.create_url_vaccine("1234567890147","Hospital", "Vaccine*><Mกข๗")
         response = requests.post(self.URL+f"/reservation?{vaccine_url}")
         res_json = response.json()
-        requests.delete(self.URL+f"/registration")
+        requests.delete(self.URL+f"/registration/1234567890147")
         self.assertEqual("reservation failed: invalid vaccine name", res_json["feedback"])
 
     def test_reserve_duplicate_vaccine(self):
@@ -123,7 +123,7 @@ class GovernmentApiTest(unittest.TestCase):
         vaccine_url2 = self.create_url_vaccine("1234567890147","Hospital", "Sinofarm")
         response = requests.post(self.URL+f"/reservation?{vaccine_url2}")
         res_json = response.json()
-        requests.delete(self.URL+f"/registration")
+        requests.delete(self.URL+f"/registration/1234567890147")
         self.assertEqual("reservation failed: there is already a reservation for this citizen", res_json["feedback"])
 
     def test_cancel_reserve(self):
@@ -134,7 +134,7 @@ class GovernmentApiTest(unittest.TestCase):
         response = requests.delete(self.URL+f"/reservation/1234567890147")
         res_json = response.json()
 
-        requests.delete(self.URL+f"/registration")
+        requests.delete(self.URL+f"/registration/1234567890147")
         self.assertEqual("cancel reservation success!", res_json["feedback"])
 
 

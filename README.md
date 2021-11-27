@@ -1,4 +1,6 @@
 # vaccine-api-test
+[![Build Status](https://app.travis-ci.com/sujinunt/vaccine-api-test.svg?branch=main)](https://app.travis-ci.com/sujinunt/vaccine-api-test)
+
 Test API service for World Class Government APIs.
 ## Endpoint test
 URL: https://wcg-apis.herokuapp.com
